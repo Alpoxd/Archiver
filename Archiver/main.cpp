@@ -72,7 +72,7 @@ void main(void) {
 		std::ofstream wFile(fileName + ".arv", std::ios::binary);
 		wFile << fileExt << std::endl;
 
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < num_parts; i++) {
 			writeFile1(huffmanCodeVec[i], wFile, fileSectionDataVec[i]);
 		}
 		std::cout << "[+] File successfully encoded in " << fileName << ".arv\n";
