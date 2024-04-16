@@ -85,20 +85,29 @@ void main(void) {
 			std::cerr << "[-] Error opening file: " << fileName << std::endl;
 			std::exit(0);
 		}
-		fileName.resize(fileName.size() - 4);
+		
 		std::string fileExt;
 		rFile >> fileExt;
-		std::string newName = fileName + "_d." + fileExt;
-
-		int zeros = 0;
+		std::string newName;
+		if (fileExt != "noext") {
+			fileName.resize(fileName.size() - 4);
+			newName = fileName + "_d." + fileExt;
+		}
+		else {
+			newName = fileName + "_d";
+		}
+			
+		std::vector<int> zerosVec(num_parts);
 		std::vector<std::vector<std::pair<char, std::string>>> huffmanCodeVec(num_parts);
 		std::vector<std::vector<char>> fileSectionDataVec(num_parts);
 
 		for (int i = 0; i < num_parts; i++) {
+			int zeros = 0;
 			std::vector<std::pair<char, std::string>> huffmanCode;
 			auto fileSectionData = readFile2(rFile, huffmanCode, zeros);
 			huffmanCodeVec[i] = huffmanCode;
 			fileSectionDataVec[i] = fileSectionData;
+			zerosVec[i] = zeros;
 		}
 		if (!fileSectionDataVec.empty() and !huffmanCodeVec.empty()) {
 			std::cout << "[+] File is successfully opened\nPlease, wait...\n";
@@ -106,15 +115,15 @@ void main(void) {
 		std::vector<std::thread> thVec(num_parts);
 		std::vector<std::string> resVec(num_parts);
 		for (int i = 0; i < num_parts; i++) {
-			thVec[i] = std::thread([&fileSectionDataVec, &huffmanCodeVec, zeros, i, &resVec]() {
-				resVec[i] = decode(fileSectionDataVec[i], huffmanCodeVec[i], zeros);
+			thVec[i] = std::thread([&fileSectionDataVec, &huffmanCodeVec, &zerosVec, i, &resVec]() {
+				resVec[i] = decode(fileSectionDataVec[i], huffmanCodeVec[i], zerosVec[i]);
 			});
 		}
 		for (auto& th : thVec) th.join();
 
 		std::ofstream wFile(newName, std::ios::binary);
-		for (auto& i : resVec) {
-			wFile << i;
+		for (auto& sec : resVec) {
+			wFile << sec;
 		}
 		std::cout << "[+] File successfully decoded in " << newName << "\n";
 	}

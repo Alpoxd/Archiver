@@ -23,6 +23,8 @@ void writeFile1(std::unordered_map<char, std::string>& huffmanCode, std::ofstrea
 	}
 	else wFile << endZeros << std::endl;
 
+	wFile << data.size() / 8 << std::endl;
+
 	for (size_t i = 0; i < data.size(); i += 8) {
 		char sym = 0;
 		int k = 128;
@@ -32,5 +34,4 @@ void writeFile1(std::unordered_map<char, std::string>& huffmanCode, std::ofstrea
 		}
 		wFile << sym;
 	}
-	wFile << "!eos\n";
 }
