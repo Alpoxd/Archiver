@@ -1,5 +1,5 @@
 
-void writeFile1(std::unordered_map<char, std::string>& huffmanCode, std::ofstream& wFile, std::string text) {
+void writeFile1(std::unordered_map<char, std::string>& huffmanCode, std::ofstream& wFile, std::string text, unsigned long long& size) {
 	std::vector<bool> data;
 	for (char ch : text) {
 		for (auto i : huffmanCode[ch]) {
@@ -9,8 +9,17 @@ void writeFile1(std::unordered_map<char, std::string>& huffmanCode, std::ofstrea
 	}
 
 	wFile << huffmanCode.size() << std::endl;
+
+	auto tmp = huffmanCode.size();
+	while (tmp > 0) {
+		tmp /= 10;
+		size++;
+	}
+	size++;
+
 	for (auto& i : huffmanCode) {
 		wFile << i.first << i.second << std::endl;
+		size += 1 + i.second.size();
 	}
 
 	int endZeros = data.size() % 8;
@@ -22,6 +31,9 @@ void writeFile1(std::unordered_map<char, std::string>& huffmanCode, std::ofstrea
 		}
 	}
 	else wFile << endZeros << std::endl;
+	size += 2;
+
+	wFile << data.size() / 8 << std::endl;
 
 	for (size_t i = 0; i < data.size(); i += 8) {
 		char sym = 0;
@@ -31,6 +43,6 @@ void writeFile1(std::unordered_map<char, std::string>& huffmanCode, std::ofstrea
 			k /= 2;
 		}
 		wFile << sym;
+		size++;
 	}
-	wFile << "!eos\n";
 }

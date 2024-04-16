@@ -18,4 +18,5 @@ void readFile1(const std::string& fileName, std::string& buffer) {
 		std::cerr << "Error reading file: " << fileName << std::endl;
 		std::exit(1);
 	}
+	file.close();
 }
