@@ -72,8 +72,35 @@ void main(void) {
 		std::ofstream wFile(fileName + ".arv", std::ios::binary);
 		wFile << fileExt << std::endl;
 
+		std::vector<std::vector<char>> toWriteVec(num_parts);
+		std::vector<std::vector<bool>> dataVec(num_parts);
+
 		for (int i = 0; i < num_parts; i++) {
-			writeFile1(huffmanCodeVec[i], wFile, fileSectionDataVec[i]);
+			thVec[i] = std::thread([&fileSectionDataVec, i, &huffmanCodeVec, &dataVec, &toWriteVec]() {
+				std::vector<bool> data;
+				for (char ch : fileSectionDataVec[i]) {
+					for (auto i : huffmanCodeVec[i][ch]) {
+						if (i == '1') data.push_back(1);
+						else data.push_back(0);
+					}
+				}
+				dataVec[i] = data;
+				for (size_t it = 0; it < data.size(); it += 8) {
+					char sym = 0;
+					int k = 128;
+					for (int j = 0; j < 8; j++) {
+						sym += data[it + j] * k;
+						k /= 2;
+					}
+					toWriteVec[i].push_back(sym);
+				}
+				});
+		}
+
+		for (auto& th : thVec) th.join();
+
+		for (int i = 0; i < num_parts; i++) {
+			writeFile1(huffmanCodeVec[i], wFile, fileSectionDataVec[i], dataVec[i], toWriteVec[i]);
 		}
 		std::cout << "[+] File successfully encoded in " << fileName << ".arv\n";
 	}
