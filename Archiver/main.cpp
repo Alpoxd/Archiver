@@ -70,8 +70,37 @@ void main(void) {
 		wFile << fileExt << std::endl;
 		size += fileExt.size() + 1;
 
+		std::vector<std::vector<char>> toWriteVec(num_parts);
+		std::vector<std::vector<bool>> dataVec(num_parts);
+
 		for (int i = 0; i < num_parts; i++) {
-			writeFile1(huffmanCodeVec[i], wFile, fileSectionDataVec[i], size);
+			thVec[i] = std::thread([&fileSectionDataVec, i, &huffmanCodeVec, &dataVec, &toWriteVec]() {
+				std::vector<bool> data;
+				for (char ch : fileSectionDataVec[i]) {
+					for (auto i : huffmanCodeVec[i][ch]) {
+						if (i == '1') data.push_back(1);
+						else data.push_back(0);
+					}
+				}
+				dataVec[i] = data;
+				for (size_t it = 0; it < data.size(); it += 8) {
+					char sym = 0;
+					int k = 128;
+					for (int j = 0; j < 8; j++) {
+						sym += data[it + j] * k;
+						k /= 2;
+					}
+					toWriteVec[i].push_back(sym);
+				}
+			});
+		}
+		
+		for (auto& th : thVec) th.join();
+
+		for (auto& i : toWriteVec) size += i.size();
+
+		for (int i = 0; i < num_parts; i++) {
+			writeFile1(huffmanCodeVec[i], wFile, fileSectionDataVec[i], size, dataVec[i], toWriteVec[i]);
 		}
 
 		wFile.close();

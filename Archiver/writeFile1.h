@@ -1,12 +1,5 @@
 
-void writeFile1(std::unordered_map<char, std::string>& huffmanCode, std::ofstream& wFile, std::string text, unsigned long long& size) {
-	std::vector<bool> data;
-	for (char ch : text) {
-		for (auto i : huffmanCode[ch]) {
-			if (i == '1') data.push_back(1);
-			else data.push_back(0);
-		}
-	}
+void writeFile1(std::unordered_map<char, std::string>& huffmanCode, std::ofstream& wFile, std::string text, unsigned long long& size, std::vector<bool> data, std::vector<char> toWrite) {
 
 	wFile << huffmanCode.size() << std::endl;
 
@@ -35,14 +28,7 @@ void writeFile1(std::unordered_map<char, std::string>& huffmanCode, std::ofstrea
 
 	wFile << data.size() / 8 << std::endl;
 
-	for (size_t i = 0; i < data.size(); i += 8) {
-		char sym = 0;
-		int k = 128;
-		for (int j = 0; j < 8; j++) {
-			sym += data[i + j] * k;
-			k /= 2;
-		}
-		wFile << sym;
-		size++;
+	for (auto i : toWrite) {
+		wFile.put(i);
 	}
 }
